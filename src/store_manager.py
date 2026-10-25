@@ -15,6 +15,18 @@ from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
  
 app = Flask(__name__)
 
+def generate_reports_and_cache():
+    threading.Timer(
+        2.0, get_report_highest_spending_users, args=(True,)
+    ).start()
+    threading.Timer(
+        2.0, get_report_best_selling_products, args=(True,)
+    ).start()
+    threading.Timer(60.0, generate_reports_and_cache).start()
+
+
+generate_reports_and_cache()
+
 counter_orders = Counter('orders', 'Total calls to POST /orders')
 counter_highest_spenders = Counter(
     'highest_spenders', 'Total calls to /orders/reports/highest-spenders'
