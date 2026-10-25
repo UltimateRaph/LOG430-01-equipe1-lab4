@@ -11,8 +11,17 @@ from orders.controllers.order_controller import create_order, remove_order, get_
 from orders.controllers.user_controller import create_user, remove_user, get_user
 from stocks.controllers.product_controller import create_product, remove_product, get_product
 from stocks.controllers.stock_controller import get_stock, set_stock, get_stock_overview
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
  
 app = Flask(__name__)
+
+counter_orders = Counter('orders', 'Total calls to POST /orders')
+counter_highest_spenders = Counter(
+    'highest_spenders', 'Total calls to /orders/reports/highest-spenders'
+)
+counter_best_sellers = Counter(
+    'best_sellers', 'Total calls to /orders/reports/best-sellers'
+)
 
 @app.get('/health-check')
 def health():
@@ -23,6 +32,7 @@ def health():
 @app.post('/orders')
 def post_orders():
     """Create a new order based on information on request body"""
+    counter_orders.inc()
     return create_order(request)
 
 @app.delete('/orders/<int:order_id>')
@@ -79,12 +89,14 @@ def get_stocks(product_id):
 @app.get('/orders/reports/highest-spenders')
 def get_orders_highest_spending_users():
     """Get list of highest speding users, ordered by total expenditure"""
+    counter_highest_spenders.inc()
     rows = get_report_highest_spending_users()
     return jsonify(rows)
 
 @app.get('/orders/reports/best-sellers')
 def get_orders_report_best_selling_products():
     """Get list of best selling products, ordered by number of orders"""
+    counter_best_sellers.inc()
     rows = get_report_best_selling_products()
     return jsonify(rows)
 
@@ -105,7 +117,10 @@ def graphql_supplier():
         'errors': [str(e) for e in result.errors] if result.errors else None
     })
 
-# TODO: endpoint /metrics Prometheus
+@app.get('/metrics')
+def metrics():
+    """Expose application metrics for Prometheus."""
+    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 # Start Flask app
 if __name__ == '__main__':
