@@ -1,3 +1,6 @@
+# Local lab answers
+/reponses-labo4.txt
+/docs/captures
 # Generated mock data
 generators/redis_mock_data
 db-init/00_post_init.sql
