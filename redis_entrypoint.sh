@@ -1,8 +1,8 @@
+#!/bin/bash
 # Redis population script
 # SPDX - License - Identifier: LGPL - 3.0 - or -later
 # Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2026
 
-#!/bin/bash
 set -e
 
 redis-server &
